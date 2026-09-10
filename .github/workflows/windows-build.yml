@@ -1,0 +1,59 @@
+name: build-windows
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+
+      - name: PyInstaller 打包
+        run: pyinstaller --noconfirm --clean --windowed --name Class17Assistant --icon assets/app.ico --add-data "assets;assets" --collect-all sounddevice main.py
+
+      - name: 生成绿色便携版 zip
+        run: Compress-Archive -Path dist/Class17Assistant/* -DestinationPath build/Class17Assistant_portable_v0.1.0.zip
+
+      - name: Inno Setup 编译安装包
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "build/installer.iss"
+
+      - name: 校验产物
+        run: |
+          Get-ChildItem -Recurse build/installer_out,build/*.zip | Select-Object FullName,Length
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-package
+          path: |
+            build/installer_out/*.exe
+            build/*.zip
+
+      - name: 发布 GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $files = @(Get-ChildItem build/installer_out/*.exe) + @(Get-ChildItem build/*.zip)
+          gh release create "$env:GITHUB_REF_NAME" $files `
+            --title "高二17班教学助手 $env:GITHUB_REF_NAME" `
+            --notes "首个内测版本：读书分贝测量仪、多卡片倒计时、桌面霓虹嵌入挂件、托盘驻留与开机自启。"

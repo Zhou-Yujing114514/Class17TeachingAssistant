@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.pyo
+build/installer_out/
+dist/
+*.spec
+.venv/
