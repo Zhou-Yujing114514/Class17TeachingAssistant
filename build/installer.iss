@@ -23,7 +23,7 @@ SetupIconFile=..\assets\app.ico
 UninstallDisplayIcon={app}\{#MyAppExe}
 
 [Languages]
-Name: "chinesesimp"; MessagesFile: "compiler:Default.isl;ChineseSimplified.isl"
+Name: "chinesesimp"; MessagesFile: "compiler:Default.isl,ChineseSimplified.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "创建桌面快捷方式"; GroupDescription: "附加图标:"
