@@ -32,6 +32,10 @@ jobs:
       - name: 生成绿色便携版 zip
         run: Compress-Archive -Path dist/Class17Assistant/* -DestinationPath build/Class17Assistant_portable_v0.1.0.zip
 
+      - name: 下载 Inno 简体中文语言包
+        run: |
+          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "build/ChineseSimplified.isl"
+
       - name: Inno Setup 编译安装包
         run: |
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "build/installer.iss"
