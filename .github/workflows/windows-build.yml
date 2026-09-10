@@ -34,7 +34,7 @@ jobs:
 
       - name: 下载 Inno 简体中文语言包
         run: |
-          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "build/ChineseSimplified.isl"
+          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/ChineseSimplified.isl" -OutFile "build/ChineseSimplified.isl"
 
       - name: Inno Setup 编译安装包
         run: |
