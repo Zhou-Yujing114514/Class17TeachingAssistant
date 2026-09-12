@@ -30,7 +30,10 @@ jobs:
         run: pyinstaller --noconfirm --clean --windowed --name Class17Assistant --icon assets/app.ico --add-data "assets;assets" --collect-all sounddevice main.py
 
       - name: 生成绿色便携版 zip
-        run: Compress-Archive -Path dist/Class17Assistant/* -DestinationPath build/Class17Assistant_portable_v0.1.0.zip
+        shell: pwsh
+        run: |
+          $ver = if ($env:GITHUB_REF_NAME -like 'v*') { $env:GITHUB_REF_NAME } else { 'v0.2.0' }
+          Compress-Archive -Path dist/Class17Assistant/* -DestinationPath "build/Class17Assistant_portable_$ver.zip"
 
       - name: 下载 Inno 简体中文语言包
         run: |
@@ -60,4 +63,4 @@ jobs:
           $files = @(Get-ChildItem build/installer_out/*.exe) + @(Get-ChildItem build/*.zip)
           gh release create "$env:GITHUB_REF_NAME" $files `
             --title "高二17班教学助手 $env:GITHUB_REF_NAME" `
-            --notes "首个内测版本：读书分贝测量仪、多卡片倒计时、桌面霓虹嵌入挂件、托盘驻留与开机自启。"
+            --notes "v0.2.0：读书分贝测量仪新增全屏模式（Esc 或按钮退出），标题下新增大字格言「读书读得越响，分数考的越高」；含多卡片倒计时、桌面霓虹嵌入挂件、托盘驻留与开机自启。"

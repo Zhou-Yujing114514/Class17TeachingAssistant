@@ -69,6 +69,13 @@ NavButton:checked {{
 
 #PageTitle {{ font-size: 22px; font-weight: 700; color: #18222e; }}
 #PageSub {{ color: {SUBTEXT}; font-size: 12.5px; }}
+#Motto {{
+    font-size: 26px;
+    font-weight: 800;
+    color: {ACCENT_DARK};
+    letter-spacing: 1px;
+    padding: 4px 0 2px;
+}}
 
 QFrame#Card {{
     background: #ffffff;

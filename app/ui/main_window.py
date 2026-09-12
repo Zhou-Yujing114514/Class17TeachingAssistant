@@ -3,7 +3,7 @@ from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (QWidget, QFrame, QVBoxLayout, QHBoxLayout,
                                QLabel, QPushButton, QButtonGroup,
                                QStackedWidget, QGraphicsDropShadowEffect)
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QKeySequence, QShortcut
 from PySide6.QtCore import Qt
 
 from app import __version__
@@ -35,8 +35,10 @@ class MainWindow(QWidget):
 
         outer = QVBoxLayout(self)
         outer.setContentsMargins(14, 14, 14, 14)
+        self.outer = outer
         root = QFrame()
         root.setObjectName("Root")
+        self.root = root
         shadow = QGraphicsDropShadowEffect(root)
         shadow.setBlurRadius(28)
         shadow.setOffset(0, 6)
@@ -62,6 +64,7 @@ class MainWindow(QWidget):
         # 侧边栏
         sidebar = QFrame()
         sidebar.setObjectName("Sidebar")
+        self.sidebar = sidebar
         sidebar.setFixedWidth(198)
         sb = QVBoxLayout(sidebar)
         sb.setContentsMargins(14, 14, 14, 14)
@@ -101,6 +104,39 @@ class MainWindow(QWidget):
         body.addWidget(sidebar)
         body.addWidget(self.stack, 1)
         box.addLayout(body, 1)
+
+        # 分贝仪全屏
+        self.page_db.fullscreen_requested.connect(self.set_meter_fullscreen)
+        self._meter_fullscreen = False
+        esc = QShortcut(QKeySequence(Qt.Key_Escape), self)
+        esc.activated.connect(self._esc_exit_fullscreen)
+
+    def _esc_exit_fullscreen(self):
+        if self._meter_fullscreen:
+            self.page_db.set_fullscreen(False)
+
+    def set_meter_fullscreen(self, on: bool):
+        self._meter_fullscreen = on
+        if on:
+            # 释放固定尺寸，铺满整块屏幕
+            self.setMinimumSize(0, 0)
+            self.setMaximumSize(16777215, 16777215)
+            self.outer.setContentsMargins(0, 0, 0, 0)
+            self.root.setStyleSheet("#Root{border-radius:0px;}")
+            self.titlebar.hide()
+            self.sidebar.hide()
+            self.hide()
+            self.setAttribute(Qt.WA_TranslucentBackground, False)
+            self.showFullScreen()
+        else:
+            self.showNormal()
+            self.titlebar.show()
+            self.sidebar.show()
+            self.outer.setContentsMargins(14, 14, 14, 14)
+            self.root.setStyleSheet("")
+            self.setAttribute(Qt.WA_TranslucentBackground, True)
+            self.setFixedSize(1000, 680)
+            self.show()
 
     def hide_to_tray(self):
         self.hide()

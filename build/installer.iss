@@ -1,6 +1,6 @@
 ; Inno Setup 安装包脚本（由 GitHub Actions 在 Windows 上编译）
 #define MyAppName "高二17班教学助手"
-#define MyAppVersion "0.1.0"
+#define MyAppVersion "0.2.0"
 #define MyAppPublisher "高二17班"
 #define MyAppExe "Class17Assistant.exe"
 
@@ -13,7 +13,7 @@ DefaultDirName={autopf}\Class17Assistant
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 OutputDir=installer_out
-OutputBaseFilename=Class17Assistant_Setup_v0.1.0
+OutputBaseFilename=Class17Assistant_Setup_v0.2.0
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
