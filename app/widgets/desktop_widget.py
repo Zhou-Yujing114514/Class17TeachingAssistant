@@ -50,12 +50,13 @@ class DesktopCountdownWidget(QWidget):
     def apply_settings(self, settings: dict):
         self.settings = settings
         self.anim.setDuration(int(float(settings.get("neon_period_s", 7.0)) * 1000))
-        self._value_size = int(settings.get("widget_font_size", 24))
+        # 挂件数字行字号：最小 44px，可继续调大
+        self._value_size = max(44, int(settings.get("widget_font_size", 44)))
         self._rebuild_paths()
 
     def _fonts(self):
         f_name = QFont("Microsoft YaHei UI")
-        f_name.setPixelSize(max(11, int(self._value_size * 0.55)))
+        f_name.setPixelSize(max(26, int(self._value_size * 0.6)))
         f_name.setBold(True)
         f_val = QFont("Microsoft YaHei UI")
         f_val.setPixelSize(self._value_size)
@@ -68,19 +69,23 @@ class DesktopCountdownWidget(QWidget):
 
     def update_card(self, cd: dict):
         self.cd = cd
-        self._name = cd["name"]
         self.refresh_text()
 
     def refresh_text(self):
         target = parse_target(self.cd["target"])
         total, arrived, d, h, m, s = remaining(target)
         self._arrived = arrived
+        raw_name = self.cd["name"]
         if arrived:
+            # 已到：名称行只显示事件名，数值行显示「已到」
+            self._name = raw_name
             self._value = "已到"
-        elif self.cd.get("precision") == "day":
-            self._value = f"还有 {math.ceil(total / 86400)} 天"
         else:
-            self._value = f"{d}天 {h:02d}时 {m:02d}分 {s:02d}秒"
+            self._name = f"距离{raw_name}还有："
+            if self.cd.get("precision") == "day":
+                self._value = f"{math.ceil(total / 86400)} 天"
+            else:
+                self._value = f"{d}天 {h:02d}时 {m:02d}分 {s:02d}秒"
         self._rebuild_paths()
 
     def _rebuild_paths(self):

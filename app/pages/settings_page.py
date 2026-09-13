@@ -78,12 +78,14 @@ class SettingsPage(QWidget):
         # 桌面挂件
         sec3 = _Section("桌面挂件")
         self.sp_font = QSpinBox()
-        self.sp_font.setRange(14, 44)
+        self.sp_font.setRange(44, 120)
+        self.sp_font.setSingleStep(2)
         self.sp_font.setSuffix(" px")
-        self.sp_font.setValue(int(s["widget_font_size"]))
+        self.sp_font.setValue(max(44, int(s["widget_font_size"])))
         self.sp_font.valueChanged.connect(
             lambda v: self.store.set_setting("widget_font_size", int(v)))
-        sec3.row("文字字号", self.sp_font)
+        sec3.row("文字字号", self.sp_font,
+                 "桌面挂件数字行字号，最小 44px，可继续调大；名称行按比例缩放")
 
         self.sp_neon = QDoubleSpinBox()
         self.sp_neon.setRange(1.0, 20.0)
