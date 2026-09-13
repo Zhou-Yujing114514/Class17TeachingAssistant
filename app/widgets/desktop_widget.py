@@ -4,13 +4,13 @@ import datetime as dt
 
 from PySide6.QtCore import (Qt, QObject, Signal, QTimer, QVariantAnimation,
                             QPoint, QRectF)
-from PySide6.QtGui import QFont, QPainterPath, QPen, QColor, QPainter
+from PySide6.QtGui import QFont, QFontMetrics, QPainterPath, QPen, QColor, QPainter
 from PySide6.QtWidgets import QWidget, QMenu, QColorDialog
 
 from app.core import desktop_embed
 from app.core.countdown_util import parse_target, remaining
 
-PAD = 16  # 光晕内边距
+PAD = 16  # 内边距下限（实际按字号放大，给霓虹光晕留足空间）
 
 
 class DesktopCountdownWidget(QWidget):
@@ -90,21 +90,38 @@ class DesktopCountdownWidget(QWidget):
 
     def _rebuild_paths(self):
         f_name, f_val = self._fonts()
+        fm_name, fm_val = QFontMetrics(f_name), QFontMetrics(f_val)
+        name_text = self._name
+        val_text = self._value if self._value else "0"
         self._p_name = QPainterPath()
-        self._p_name.addText(0, 0, f_name, self._name)
+        self._p_name.addText(0, 0, f_name, name_text)
         self._p_val = QPainterPath()
-        self._p_val.addText(0, 0, f_val, self._value if self._value else "0")
-        rn, rv = self._p_name.boundingRect(), self._p_val.boundingRect()
-        gap = max(4, int(self._value_size * 0.25))
-        self._text_w = max(rn.width(), rv.width())
-        self._text_h = rn.height() + gap + rv.height()
-        w = int(self._text_w + PAD * 2)
-        h = int(self._text_h + PAD * 2)
+        self._p_val.addText(0, 0, f_val, val_text)
+
+        # 用字体度量计算尺寸（QPainterPath.boundingRect 不含霓虹光晕，会裁边）
+        name_w = fm_name.horizontalAdvance(name_text)
+        val_w = fm_val.horizontalAdvance(val_text)
+        name_h = fm_name.height()
+        val_h = fm_val.height()
+        # 光晕最粗 0.30em，半边 0.15em；内边距按字号放大并留抗锯齿余量
+        self._m = max(PAD, int(self._value_size * 0.24) + 3)
+        self._gap = max(8, int(self._value_size * 0.22))
+        self._text_w = max(name_w, val_w)
+        w = self._text_w + self._m * 2
+        h = name_h + self._gap + val_h + self._m * 2
+
+        # 绘制原点（文字基线位置），两行各自水平居中
+        self._x_name = self._m + (self._text_w - name_w) / 2
+        self._x_val = self._m + (self._text_w - val_w) / 2
+        self._y_name = self._m + fm_name.ascent()
+        self._y_val = self._m + name_h + self._gap + fm_val.ascent()
+
         old_right = self.x() + self.width()
-        self.setFixedSize(w, h)
+        old_bottom = self.y() + self.height()
+        self.setFixedSize(int(w), int(h))
         # 右锚定：数字变宽时向左生长，避免右上角跳动
         if self.isVisible():
-            self.move(old_right - w, self.y())
+            self.move(int(old_right - w), int(old_bottom - h))
         self.update()
 
     def _current_color(self) -> QColor:
@@ -117,15 +134,9 @@ class DesktopCountdownWidget(QWidget):
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
         p.setRenderHint(QPainter.TextAntialiasing)
-        rn = self._p_name.boundingRect()
-        rv = self._p_val.boundingRect()
-        gap = max(4, int(self._value_size * 0.25))
-        # 名称行与数值行左对齐、整体水平居中
-        x_name = PAD + (self._text_w - rn.width()) / 2 - rn.x()
-        x_val = PAD + (self._text_w - rv.width()) / 2 - rv.x()
-        y0 = PAD - rn.y()
+        # 名称行（白色）与数值行（霓虹色），各自水平居中
         p.save()
-        p.translate(x_name, y0)
+        p.translate(self._x_name, self._y_name)
         if self.settings.get("dark_outline", True):
             p.setPen(QPen(QColor(0, 0, 0, 90), 1.4))
             p.setBrush(Qt.NoBrush)
@@ -136,7 +147,7 @@ class DesktopCountdownWidget(QWidget):
         p.restore()
 
         p.save()
-        p.translate(x_val, y0 + rn.height() + gap - rv.y())
+        p.translate(self._x_val, self._y_val)
         color = self._current_color()
         # 霓虹光晕：两层粗描边
         for width, alpha in ((self._value_size * 0.30, 70),

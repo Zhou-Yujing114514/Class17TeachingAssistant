@@ -32,7 +32,7 @@ jobs:
       - name: 生成绿色便携版 zip
         shell: pwsh
         run: |
-          $ver = if ($env:GITHUB_REF_NAME -like 'v*') { $env:GITHUB_REF_NAME } else { 'v0.2.1' }
+          $ver = if ($env:GITHUB_REF_NAME -like 'v*') { $env:GITHUB_REF_NAME } else { 'v0.2.2' }
           Compress-Archive -Path dist/Class17Assistant/* -DestinationPath "build/Class17Assistant_portable_$ver.zip"
 
       - name: 下载 Inno 简体中文语言包
@@ -63,4 +63,4 @@ jobs:
           $files = @(Get-ChildItem build/installer_out/*.exe) + @(Get-ChildItem build/*.zip)
           gh release create "$env:GITHUB_REF_NAME" $files `
             --title "高二17班教学助手 $env:GITHUB_REF_NAME" `
-            --notes "v0.2.1：桌面倒计时挂件文案改为「距离{事件}还有：X天 XX时 XX分 XX秒」（到点显示「已到」）；挂件字号默认且最小 44px，可在设置中继续调大（44-120px）。v0.2.0：分贝仪全屏模式（Esc 或按钮退出）+ 大字格言。"
+            --notes "v0.2.2：修复桌面挂件文字底部/边缘被裁切的问题——改用字体度量计算窗口尺寸，内边距随字号放大，任意字号（44-120px）下霓虹光晕完整显示。v0.2.1：挂件文案「距离{事件}还有：…」、字号默认且最小44px。v0.2.0：分贝仪全屏模式 + 大字格言。"
