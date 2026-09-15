@@ -35,9 +35,20 @@ jobs:
           $ver = if ($env:GITHUB_REF_NAME -like 'v*') { $env:GITHUB_REF_NAME } else { 'v0.2.2' }
           Compress-Archive -Path dist/Class17Assistant/* -DestinationPath "build/Class17Assistant_portable_$ver.zip"
 
-      - name: 下载 Inno 简体中文语言包
+      - name: 下载 Inno 简体中文语言包（固定 commit + 哈希校验）
+        shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/ChineseSimplified.isl" -OutFile "build/ChineseSimplified.isl"
+          # 安全修复：固定到具体 commit SHA，避免 main 分支被篡改
+          $url = "https://raw.githubusercontent.com/jrsoftware/issrc/1ae7bf81dc0d2013235dfe4bb0b6f4e4a0b6b25c/Files/Languages/ChineseSimplified.isl"
+          Invoke-WebRequest -Uri $url -OutFile "build/ChineseSimplified.isl"
+          # SHA256 校验，防止供应链投毒
+          $expectedHash = "e0b0b350e2245f3c5e65586dfe43d574f6e7f06f2261149aba284954b3fc9a8d"
+          $actualHash = (Get-FileHash "build/ChineseSimplified.isl" -Algorithm SHA256).Hash.ToLower()
+          if ($actualHash -ne $expectedHash) {
+            Write-Error "Inno 语言包哈希校验失败！期望 $expectedHash，实际 $actualHash"
+            exit 1
+          }
+          Write-Host "Inno 语言包哈希校验通过: $actualHash"
 
       - name: Inno Setup 编译安装包
         run: |
