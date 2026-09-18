@@ -87,6 +87,14 @@ class SettingsPage(QWidget):
         sec3.row("文字字号", self.sp_font,
                  "桌面挂件数字行字号，最小 44px，可继续调大；名称行按比例缩放")
 
+        self.cmb_weight = QComboBox()
+        self.cmb_weight.addItems(["细（推荐）", "标准", "粗"])
+        self.cmb_weight.setCurrentIndex(int(s.get("widget_font_weight", 0)))
+        self.cmb_weight.currentIndexChanged.connect(
+            lambda v: self.store.set_setting("widget_font_weight", int(v)))
+        sec3.row("字体粗细", self.cmb_weight,
+                 "霓虹挂件文字粗细：细更清爽、光晕层次清晰；粗更有力量感")
+
         self.sp_neon = QDoubleSpinBox()
         self.sp_neon.setRange(1.0, 20.0)
         self.sp_neon.setSingleStep(0.5)

@@ -10,6 +10,7 @@ from .paths import app_data_dir
 DEFAULT_SETTINGS = {
     "db_offset": 94,            # 分贝估算偏移（dBFS -> 估算 dB）
     "widget_font_size": 44,     # 桌面挂件字号（最小 44px，可往大调）
+    "widget_font_weight": 0,    # 桌面挂件字体粗细：0 细 1 标准 2 粗
     "neon_period_s": 7.0,       # 霓虹颜色流动一周的秒数
     "dark_outline": True,       # 挂件文字暗色描边衬底
     "default_color_mode": "neon",

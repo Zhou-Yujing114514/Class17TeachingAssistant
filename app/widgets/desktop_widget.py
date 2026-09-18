@@ -55,12 +55,16 @@ class DesktopCountdownWidget(QWidget):
         self._rebuild_paths()
 
     def _fonts(self):
+        weight = int(self.settings.get("widget_font_weight", 0))
+        # 三档：0 细（默认，光晕层次清晰）/ 1 标准 / 2 粗（旧版效果）
+        w_name = (QFont.Weight.Medium, QFont.Weight.DemiBold, QFont.Weight.Bold)[weight]
+        w_val = (QFont.Weight.Normal, QFont.Weight.DemiBold, QFont.Weight.Bold)[weight]
         f_name = QFont("Microsoft YaHei UI")
         f_name.setPixelSize(max(26, int(self._value_size * 0.6)))
-        f_name.setBold(True)
+        f_name.setWeight(w_name)
         f_val = QFont("Microsoft YaHei UI")
         f_val.setPixelSize(self._value_size)
-        f_val.setBold(True)
+        f_val.setWeight(w_val)
         return f_name, f_val
 
     def _on_hue(self, v):
